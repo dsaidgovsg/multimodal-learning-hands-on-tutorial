@@ -275,8 +275,8 @@ def main():
     df_test[args['image_path_field']] = df_test[args['image_path_field']].apply(lambda x: image_folder + x)
     
     classifier_train_test(df_train, df_test, classifier_type="bert", output_folder=results_folder, args=args)
-    # classifier_train_test(df_train, df_test, classifier_type="bert_resnet", output_folder=results_folder, args=args)
-    # classifier_train_test(df_train, df_test, classifier_type="albef", output_folder=results_folder, args=args)
+    classifier_train_test(df_train, df_test, classifier_type="bert_resnet", output_folder=results_folder, args=args)
+    classifier_train_test(df_train, df_test, classifier_type="albef", output_folder=results_folder, args=args)
 
 
 if __name__ == "__main__":
