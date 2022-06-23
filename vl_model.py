@@ -3,8 +3,8 @@ import torch
 from yaml import load_all
 from torchvision.models.resnet import resnet50
 from transformers import AutoModel
-from albef.vit import VisionTransformer
-from albef.xbert import BertConfig as AlbefBertConfig, BertModel as AlbefBertModel
+from vit import VisionTransformer
+from xbert import BertConfig as AlbefBertConfig, BertModel as AlbefBertModel
 from functools import partial
 import os
 

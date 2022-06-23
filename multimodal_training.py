@@ -83,7 +83,7 @@ class VLClassifier:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             
 
-    def train(self, df_train, **training_args):
+    def train(self, df_train, training_args):
         batch_size = training_args.get('batch_size')
         num_train_epochs = training_args.get('num_train_epochs')
         learning_rate = training_args.get('learning_rate')
@@ -144,7 +144,7 @@ class VLClassifier:
 
                 self.model.zero_grad()
 
-                if b_imgs is not None:        
+                if b_imgs is None:        
                     b_logits = self.model(text=b_inputs)
                 else:
                     b_logits = self.model(text=b_inputs, image=b_imgs)
@@ -174,7 +174,7 @@ class VLClassifier:
         print('Training completed in ', training_time, 'seconds')
 
     
-    def predict(self, df_test, **eval_args):
+    def predict(self, df_test, eval_args):
         batch_size = eval_args.get('batch_size')
         max_seq_length = eval_args.get('max_seq_length')
         text_field = eval_args.get('text_field')
@@ -201,7 +201,7 @@ class VLClassifier:
             else:
                 b_text, b_labels, b_imgs = batch
 
-            b_inputs = self.tpkenizer(list(b_text), truncation=True, max_length=max_seq_length, return_tensors="pt", padding=True)
+            b_inputs = self.tokenizer(list(b_text), truncation=True, max_length=max_seq_length, return_tensors="pt", padding=True)
 
             b_inputs = b_inputs.to(self.device)
             b_labels = b_labels.to(self.device)
@@ -259,7 +259,7 @@ def main():
     torch.manual_seed(19)
 
     args = {
-        'batch_size': 16,
+        'batch_size': 4,
         'num_train_epochs': 5,
         'learning_rate': 2.0e-5,
         'weight_decay': 1,
@@ -275,7 +275,10 @@ def main():
     df_test[args['image_path_field']] = df_test[args['image_path_field']].apply(lambda x: image_folder + x)
     
     classifier_train_test(df_train, df_test, classifier_type="bert", output_folder=results_folder, args=args)
-    classifier_train_test(df_train, df_test, classifier_type="bert_resnet", output_folder=results_folder, args=args)
-    classifier_train_test(df_train, df_test, classifier_type="albef", output_folder=results_folder, args=args)
+    # classifier_train_test(df_train, df_test, classifier_type="bert_resnet", output_folder=results_folder, args=args)
+    # classifier_train_test(df_train, df_test, classifier_type="albef", output_folder=results_folder, args=args)
 
+
+if __name__ == "__main__":
+    main()
 

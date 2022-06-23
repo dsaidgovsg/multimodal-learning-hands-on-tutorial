@@ -1,0 +1,9 @@
+./KDD/*
+*.jpg
+*.csv
+*.zip
+*.pyc
+*.pth
+*.pt
+*.json
+*__MACOSX*
