@@ -7,7 +7,7 @@ if [ ! -d $WEBVISION_DATA_FOLDER ]
 then
     echo "Creating data folder and downloading data files" 
     mkdir -p $WEBVISION_DATA_FOLDER
-    wget "https://drive.google.com/uc?id=1-dZe56JjJdJVDWAYMCRpRtgPFw42lhaO&export=download" -O $WEBVISION_DATA_FOLDER/data.zip
+    wget "https://drive.google.com/uc?id=1r4aTTbLuYgGrgpZLOgUH9sQ33DBsbOFm&export=download" -O $WEBVISION_DATA_FOLDER/data.zip
     unzip $WEBVISION_DATA_FOLDER/data.zip -d $WEBVISION_DATA_FOLDER
     echo "Completed" 
 fi
