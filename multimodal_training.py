@@ -26,6 +26,12 @@ class VLDataset(Dataset):
 
         # text only dataset
         if image_model_type is not None:
+            
+            # ResNet-50 and ALBEF use different image sizes
+            if image_model_type.lower() == "restnet":   # ResNet-50 settings
+                self.img_size = 224
+            elif image_model_type.lower() == "albef":   # ALBEF settings
+                self.img_size = 256
         
             self.mean, self.std = (
                 0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)
@@ -45,10 +51,6 @@ class VLDataset(Dataset):
                         transforms.Normalize(self.mean, self.std)
                         ])
 
-            if image_model_type.lower() == "restnet":   # ResNet-50 settings
-                self.img_size = 224
-            elif image_model_type.lower() == "albef":   # ALBEF settings
-                self.img_size = 256
 
                     
     def __getitem__(self, index):
