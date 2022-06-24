@@ -28,7 +28,7 @@ class VLDataset(Dataset):
         if image_model_type is not None:
             
             # ResNet-50 and ALBEF use different image sizes
-            if image_model_type.lower() == "restnet":   # ResNet-50 settings
+            if image_model_type.lower() == "resnet":   # ResNet-50 settings
                 self.img_size = 224
             elif image_model_type.lower() == "albef":   # ALBEF settings
                 self.img_size = 256
