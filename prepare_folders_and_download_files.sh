@@ -14,7 +14,7 @@ fi
 
 
 
-ALBEF_FOLDER="./KDD/ALBEF/"
+ALBEF_FOLDER="./KDD/albef/"
 
 if [ ! -d $ALBEF_FOLDER ] 
 then

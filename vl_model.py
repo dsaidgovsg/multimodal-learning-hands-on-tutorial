@@ -22,7 +22,7 @@ class BertModel(nn.Module):
     
     def forward(self, text):
         output = self.bert_model(text.input_ids, attention_mask=text.attention_mask, return_dict=True)
-        logits = self.classifier(output.pooler_output)
+        logits = self.classifier(output.last_hidden_state[:, 0, :])
         return logits
 
 
@@ -62,7 +62,7 @@ class BertResNetModel(nn.Module):
 
     def forward(self, text, image):
         text_output = self.bert_model(**text)
-        text_feature = text_output.pooler_output
+        text_feature = text_output.last_hidden_state[:, 0, :]
         img_feature = self.image_model(image)
         features = torch.cat((text_feature, img_feature), 1)
 
@@ -95,7 +95,7 @@ class AlbefModel(nn.Module):
         output = self.bert_model(text.input_ids, attention_mask=text.attention_mask,
                                    encoder_hidden_states=image_embeds, encoder_attention_mask=image_atts, return_dict=True
                                    )
-        logits = self.classifier(output.pooler_output)
+        logits = self.classifier(output.last_hidden_state[:, 0, :])
         return logits
 
 
