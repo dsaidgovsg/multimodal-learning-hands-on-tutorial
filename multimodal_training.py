@@ -114,7 +114,8 @@ class VLClassifier:
 
 
         optimizer = AdamW(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        scheduler = get_scheduler(name="linear", optimizer=optimizer, num_warmup_steps=warmup_steps, num_training_steps=t_total)
+        # scheduler = get_scheduler(name="linear", optimizer=optimizer, num_warmup_steps=warmup_steps, num_training_steps=t_total)
+        scheduler = get_scheduler(name="constant", optimizer=optimizer)
 
         tr_loss = 0.0
 
