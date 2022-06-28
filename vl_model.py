@@ -15,13 +15,13 @@ class BertModel(nn.Module):
         super().__init__()
 
         self.num_labels = num_labels
-        self.bert_model = AutoModel.from_pretrained(text_pretrained)
+        self.text_encoder = AutoModel.from_pretrained(text_pretrained)
         self.classifier = nn.Linear(
-            self.bert_model.config.hidden_size, num_labels)
+            self.text_encoder.config.hidden_size, num_labels)
         
     
     def forward(self, text):
-        output = self.bert_model(text.input_ids, attention_mask=text.attention_mask, return_dict=True)
+        output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True)
         logits = self.classifier(output.last_hidden_state[:, 0, :])
         return logits
 
@@ -54,16 +54,16 @@ class ResNetFeatureModel(nn.Module):
 class BertResNetModel(nn.Module):
     def __init__(self, num_labels, text_pretrained='bert-base-uncased'):
         super().__init__()
-        self.bert_model = AutoModel.from_pretrained(text_pretrained)
-        self.image_model = ResNetFeatureModel(output_layer='avgpool')
+        self.text_encoder = AutoModel.from_pretrained(text_pretrained)
+        self.visual_encoder = ResNetFeatureModel(output_layer='avgpool')
         self.image_hidden_size = 2048
         
-        self.classifier = nn.Linear(self.bert_model.config.hidden_size + self.image_hidden_size, num_labels)
+        self.classifier = nn.Linear(self.text_encoder.config.hidden_size + self.image_hidden_size, num_labels)
 
     def forward(self, text, image):
-        text_output = self.bert_model(**text)
+        text_output = self.text_encoder(**text)
         text_feature = text_output.last_hidden_state[:, 0, :]
-        img_feature = self.image_model(image)
+        img_feature = self.visual_encoder(image)
         features = torch.cat((text_feature, img_feature), 1)
 
         logits = self.classifier(features)
@@ -78,21 +78,21 @@ class AlbefModel(nn.Module):
         super().__init__()
 
         self.num_labels = num_labels
-        self.bert_model = AlbefBertModel.from_pretrained(
+        self.text_encoder = AlbefBertModel.from_pretrained(
             'bert-base-uncased', config=bert_config, add_pooling_layer=False)
 
-        self.image_model = VisionTransformer(
+        self.visual_encoder = VisionTransformer(
             img_size=256, patch_size=16, embed_dim=768, depth=12, num_heads=12,
             mlp_ratio=4, qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
 
         self.classifier = nn.Linear(
-            self.bert_model.config.hidden_size, num_labels)
+            self.text_encoder.config.hidden_size, num_labels)
         
     
     def forward(self, text, image):
-        image_embeds = self.image_model(image)
+        image_embeds = self.visual_encoder(image)
         image_atts = torch.ones(image_embeds.size()[:-1], dtype=torch.long).to(image_embeds.device)
-        output = self.bert_model(text.input_ids, attention_mask=text.attention_mask,
+        output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask,
                                    encoder_hidden_states=image_embeds, encoder_attention_mask=image_atts, return_dict=True
                                    )
         logits = self.classifier(output.last_hidden_state[:, 0, :])
