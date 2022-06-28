@@ -12,6 +12,8 @@ from time import perf_counter
 from PIL import Image
 import pandas as pd
 from vl_model import create_model
+import random
+import numpy as np
 
 
 class VLDataset(Dataset):
@@ -259,15 +261,19 @@ def main():
     df_train = pd.read_csv(data_folder + 'train.csv')
     df_test = pd.read_csv(data_folder + 'test.csv')
 
-    torch.manual_seed(19)
+    seed_val = 0
+    random.seed(seed_val)
+    np.random.seed(seed_val)
+    torch.manual_seed(seed_val)
+    torch.cuda.manual_seed_all(seed_val)
 
     args = {
-        'batch_size': 4,
+        'batch_size': 16,
         'num_train_epochs': 5,
-        'learning_rate': 2.0e-5,
-        'weight_decay': 1,
+        'learning_rate': 1.0e-5,
+        'weight_decay': 0.01,
         'warmup_steps': 0,
-        'max_seq_length': 200 ,
+        'max_seq_length': 64 ,
         'text_field': 'text',
         'label_field': 'label',
         'image_path_field': 'img_path',
