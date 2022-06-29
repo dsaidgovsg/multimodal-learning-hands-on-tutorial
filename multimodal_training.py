@@ -310,7 +310,12 @@ def classifier_train_test(df_train, df_test, classifier_type, output_folder, arg
     os.makedirs(model_save_dir)
     classifier.save(model_save_dir)
     
-    
+def set_seed(seed_val):
+    random.seed(seed_val)
+    np.random.seed(seed_val)
+    torch.manual_seed(seed_val)
+    torch.cuda.manual_seed_all(seed_val)
+
 def main():
     home_folder = './KDD/'
     data_folder = home_folder + 'webvision_data/'
@@ -323,10 +328,7 @@ def main():
     df_test = pd.read_csv(data_folder + 'test.csv')
 
     seed_val = 0
-    random.seed(seed_val)
-    np.random.seed(seed_val)
-    torch.manual_seed(seed_val)
-    torch.cuda.manual_seed_all(seed_val)
+    
 
     args = {
         'batch_size': 16,
@@ -344,9 +346,12 @@ def main():
     df_train[args['image_path_field']] = df_train[args['image_path_field']].apply(lambda x: image_folder + x)
     df_test[args['image_path_field']] = df_test[args['image_path_field']].apply(lambda x: image_folder + x)
     
+    set_seed(seed_val)
     classifier_train_test(df_train, df_test, classifier_type="bert", output_folder=results_folder, args=args)
-    # classifier_train_test(df_train, df_test, classifier_type="bert_resnet", output_folder=results_folder, args=args)
-    # classifier_train_test(df_train, df_test, classifier_type="albef", output_folder=results_folder, args=args)
+    set_seed(seed_val)
+    classifier_train_test(df_train, df_test, classifier_type="bert_resnet", output_folder=results_folder, args=args)
+    set_seed(seed_val)
+    classifier_train_test(df_train, df_test, classifier_type="albef", output_folder=results_folder, args=args)
 
 
 if __name__ == "__main__":
