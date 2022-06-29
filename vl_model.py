@@ -7,10 +7,11 @@ from vit import VisionTransformer
 from xbert import BertConfig as AlbefBertConfig, BertModel as AlbefBertModel
 from functools import partial
 import os
+from urllib.request import urlretrieve
 
 
 
-class BertModel(nn.Module):
+class VLBertModel(nn.Module):
     def __init__(self, num_labels, text_pretrained='bert-base-uncased'):
         super().__init__()
 
@@ -99,15 +100,23 @@ class AlbefModel(nn.Module):
         return logits
 
 
-    def load_albef_pretrained(model_directory, num_out_labels, device):
-        albef_bert_config_fp = os.path.join(model_directory, 'config_bert.json')
-        albef_model_fp = os.path.join(model_directory, 'ALBEF.pth')
+    def load_albef_pretrained(num_out_labels):
+        tmp_directory = './tmp/albef'
+        os.makedirs(tmp_directory, exist_ok=True)
+
+        albef_bert_config_fp = os.path.join(tmp_directory, 'config_bert.json')
+        albef_model_fp = os.path.join(tmp_directory, 'ALBEF.pth')
+
+        if not os.path.exists(albef_bert_config_fp):
+            urlretrieve("https://raw.githubusercontent.com/salesforce/ALBEF/main/configs/config_bert.json", albef_bert_config_fp)
+
+        if not os.path.exists(albef_model_fp):
+            urlretrieve("https://storage.googleapis.com/sfr-pcl-data-research/ALBEF/ALBEF_4M.pth", albef_model_fp)
 
         albef_bert_config = AlbefBertConfig.from_json_file(albef_bert_config_fp)
-
         albef_model = AlbefModel(bert_config=albef_bert_config, num_labels=num_out_labels)
 
-        albef_checkpoint = torch.load(albef_model_fp, map_location=device)
+        albef_checkpoint = torch.load(albef_model_fp, map_location='cpu')
         albef_state_dict = albef_checkpoint['model']
 
         for key in list(albef_state_dict.keys()):
@@ -121,15 +130,11 @@ class AlbefModel(nn.Module):
         print(msg)
         return albef_model
 
-def create_model(image_model_type, num_labels, device, text_pretrained='bert-base-uncased', albef_directory=None):
+def create_model(image_model_type, num_labels, text_pretrained='bert-base-uncased'):
     if image_model_type is None:
-        return BertModel(num_labels, text_pretrained=text_pretrained).to(device)
+        return VLBertModel(num_labels, text_pretrained=text_pretrained)
     elif image_model_type.lower().strip() == "resnet":
-        return BertResNetModel(num_labels, text_pretrained=text_pretrained).to(device)
+        return BertResNetModel(num_labels, text_pretrained=text_pretrained)
     elif image_model_type.lower().strip() == "albef":
-        if albef_directory is not None:
-            model = AlbefModel.load_albef_pretrained(albef_directory, num_labels, device)
-            return model.to(device)
-        else:
-            print('Please specify a model directory for ALBEF')
+        return AlbefModel.load_albef_pretrained(num_labels)
 

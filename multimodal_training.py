@@ -80,14 +80,19 @@ class VLDataset(Dataset):
 
 
 class VLClassifier:
-    def __init__(self, image_model_type=None):
-        self.model = None
-        self.tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+    def __init__(self, model=None, tokenizer=None, image_model_type=None, label_map=None):
+        self.model = model        
+        self.tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased") if tokenizer is None else tokenizer
         self.image_model_type = image_model_type
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.label_to_id = label_map
+        self.id_to_label = {v:k for k,v in self.label_to_id.items()} if self.label_to_id is not None else None
+        if self.model is not None:
+            self.model.to(self.device)
             
 
     def train(self, df_train, training_args):
+        self.training_args = training_args
         batch_size = training_args.get('batch_size')
         num_train_epochs = training_args.get('num_train_epochs')
         learning_rate = training_args.get('learning_rate')
@@ -97,13 +102,14 @@ class VLClassifier:
         text_field = training_args.get('text_field')
         label_field = training_args.get('label_field')
         image_path_field = training_args.get('image_path_field')
-        albef_directory = training_args.get('albef_pretrained_folder', None)
+        # albef_directory = training_args.get('albef_pretrained_folder', None)
 
         self.label_to_id = {lab:i for i, lab in enumerate(df_train['label'].unique())}
         self.id_to_label = {v:k for k,v in self.label_to_id.items()}
         self.num_labels = len(self.label_to_id)
 
-        self.model = create_model(self.image_model_type, self.num_labels, self.device, text_pretrained='bert-base-uncased', albef_directory=albef_directory)
+        self.model = create_model(self.image_model_type, self.num_labels, text_pretrained='bert-base-uncased')
+        self.model.to(self.device)
 
         train_dataset = VLDataset(df=df_train, label_to_id=self.label_to_id, train=True, text_field=text_field, label_field=label_field, image_path_field=image_path_field, image_model_type=self.image_model_type)
         train_sampler = RandomSampler(train_dataset)        
@@ -229,6 +235,57 @@ class VLClassifier:
 
         return prediction_labels
 
+    def save(self, save_directory):
+        os.makedirs(save_directory, exist_ok=True)
+        model_sd_filepath = os.path.join(save_directory, "state_dict.pt")
+        torch.save(self.model.state_dict(), model_sd_filepath)
+
+
+
+        label_map_filepath = os.path.join(save_directory, "label_map.json")
+        with open(label_map_filepath, 'w') as f:
+            json.dump(self.label_to_id, f)
+
+
+
+        parameters = self.training_args.copy()
+        parameters['image_model_type'] = self.image_model_type
+        parameters['num_labels'] = len(self.label_to_id)
+
+        parameters_filepath = os.path.join(save_directory, "parameters.json")
+        with open(parameters_filepath, 'w') as f:
+            json.dump(parameters, f)
+
+
+    @classmethod
+    def from_pretrained(load_directory):
+        label_map_filepath = os.path.join(load_directory, "label_map.json")
+        with open(label_map_filepath, 'r') as f:
+            label_map = json.load(f)
+
+        parameters_filepath = os.path.join(load_directory, "parameters.json")
+        with open(parameters_filepath, 'r') as f:
+            parameters = json.load(f)
+
+        image_model_type = parameters['image_model_type']
+        num_labels = parameters['num_labels']
+
+        tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+
+
+        
+        model_sd_filepath = os.path.join(load_directory, "state_dict.pt")
+        model_sd = torch.load(model_sd_filepath, map_location='cpu')
+
+        model = create_model(image_model_type=image_model_type, num_labels=num_labels)
+        model.to('cpu') # load all models in cpu first
+        model.load_state_dict(model_sd, strict=True)
+        
+        return VLClassifier(model=model, tokenizer=tokenizer, image_model_type=image_model_type, label_map=label_map)
+    
+    
+
+
 def classifier_train_test(df_train, df_test, classifier_type, output_folder, args):
     classifier_to_image_model_map = {
         "bert": None,
@@ -248,6 +305,10 @@ def classifier_train_test(df_train, df_test, classifier_type, output_folder, arg
     df_out = df_test.copy()
     df_out['prediction'] = predictions
     df_out.to_csv(output_folder + classifier_type + '_predictions.csv', index=False)
+
+    model_save_dir = os.path.join(output_folder, classifier_type)
+    os.makedirs(model_save_dir)
+    classifier.save(model_save_dir)
     
     
 def main():
@@ -277,15 +338,15 @@ def main():
         'text_field': 'text',
         'label_field': 'label',
         'image_path_field': 'img_path',
-        'albef_pretrained_folder': albef_folder
+        # 'albef_pretrained_folder': albef_folder
     }
 
     df_train[args['image_path_field']] = df_train[args['image_path_field']].apply(lambda x: image_folder + x)
     df_test[args['image_path_field']] = df_test[args['image_path_field']].apply(lambda x: image_folder + x)
     
     classifier_train_test(df_train, df_test, classifier_type="bert", output_folder=results_folder, args=args)
-    classifier_train_test(df_train, df_test, classifier_type="bert_resnet", output_folder=results_folder, args=args)
-    classifier_train_test(df_train, df_test, classifier_type="albef", output_folder=results_folder, args=args)
+    # classifier_train_test(df_train, df_test, classifier_type="bert_resnet", output_folder=results_folder, args=args)
+    # classifier_train_test(df_train, df_test, classifier_type="albef", output_folder=results_folder, args=args)
 
 
 if __name__ == "__main__":
