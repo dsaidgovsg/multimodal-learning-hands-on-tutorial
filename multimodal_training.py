@@ -19,7 +19,7 @@ from ast import literal_eval
 
 class VLDataset(Dataset):
     def __init__(self, df, label_to_id, train=False, text_field="text", label_field="label", image_path_field=None, image_model_type=None, geoloc_start_ind=None, geoloc_end_ind=None):
-        self.df = df.reset_index()
+        self.df = df.reset_index(drop=True)
         self.label_to_id = label_to_id
         self.train = train
         self.text_field = text_field
