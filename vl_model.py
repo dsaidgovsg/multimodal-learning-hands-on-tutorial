@@ -10,20 +10,25 @@ import os
 from urllib.request import urlretrieve
 
 
-
 class VLBertModel(nn.Module):
-    def __init__(self, num_labels, text_pretrained='bert-base-uncased'):
+    def __init__(self, num_labels, text_pretrained='bert-base-uncased', geoloc_features=14):
         super().__init__()
 
         self.num_labels = num_labels
+        self.geoloc_features = geoloc_features
         self.text_encoder = AutoModel.from_pretrained(text_pretrained)
         self.classifier = nn.Linear(
-            self.text_encoder.config.hidden_size, num_labels)
+            self.text_encoder.config.hidden_size + self.geoloc_features, num_labels)
         
     
-    def forward(self, text):
-        output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True)
-        logits = self.classifier(output.last_hidden_state[:, 0, :])
+    def forward(self, text, geoloc=None):
+        bert_output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True)
+        bert_features  = bert_output.last_hidden_state[:, 0, :]
+        if geoloc is None:
+            features = bert_features
+        else:
+            features = torch.cat((bert_features, geoloc), 1)
+        logits = self.classifier(features)
         return logits
 
 
@@ -53,19 +58,24 @@ class ResNetFeatureModel(nn.Module):
 # reference: https://medium.com/the-owl/extracting-features-from-an-intermediate-layer-of-a-pretrained-model-in-pytorch-c00589bda32b
 
 class BertResNetModel(nn.Module):
-    def __init__(self, num_labels, text_pretrained='bert-base-uncased'):
+    def __init__(self, num_labels, text_pretrained='bert-base-uncased', geoloc_features=14):
         super().__init__()
         self.text_encoder = AutoModel.from_pretrained(text_pretrained)
         self.visual_encoder = ResNetFeatureModel(output_layer='avgpool')
         self.image_hidden_size = 2048
-        
-        self.classifier = nn.Linear(self.text_encoder.config.hidden_size + self.image_hidden_size, num_labels)
+        self.geoloc_features = geoloc_features
 
-    def forward(self, text, image):
+        
+        self.classifier = nn.Linear(self.text_encoder.config.hidden_size + self.image_hidden_size + self.geoloc_features, num_labels)
+
+    def forward(self, text, image, geoloc=None):
         text_output = self.text_encoder(**text)
         text_feature = text_output.last_hidden_state[:, 0, :]
         img_feature = self.visual_encoder(image)
-        features = torch.cat((text_feature, img_feature), 1)
+        if geoloc is None:
+            features = torch.cat((text_feature, img_feature), 1)        
+        else:
+            features = torch.cat((text_feature, img_feature, geoloc), 1)
 
         logits = self.classifier(features)
 
@@ -75,10 +85,12 @@ class BertResNetModel(nn.Module):
 
 class AlbefModel(nn.Module):
 
-    def __init__(self, bert_config, num_labels):
+    def __init__(self, bert_config, num_labels, geoloc_features=14):
         super().__init__()
 
         self.num_labels = num_labels
+        self.geoloc_features = geoloc_features
+
         self.text_encoder = AlbefBertModel.from_pretrained(
             'bert-base-uncased', config=bert_config, add_pooling_layer=False)
 
@@ -87,16 +99,23 @@ class AlbefModel(nn.Module):
             mlp_ratio=4, qkv_bias=True, norm_layer=partial(nn.LayerNorm, eps=1e-6))
 
         self.classifier = nn.Linear(
-            self.text_encoder.config.hidden_size, num_labels)
+            self.text_encoder.config.hidden_size + self.geoloc_features, num_labels)
         
     
-    def forward(self, text, image):
+    def forward(self, text, image, geoloc=None):
         image_embeds = self.visual_encoder(image)
         image_atts = torch.ones(image_embeds.size()[:-1], dtype=torch.long).to(image_embeds.device)
         output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask,
                                    encoder_hidden_states=image_embeds, encoder_attention_mask=image_atts, return_dict=True
                                    )
-        logits = self.classifier(output.last_hidden_state[:, 0, :])
+        
+        albef_features = output.last_hidden_state[:, 0, :]
+        if geoloc is None:
+            features = albef_features        
+        else:
+            features = torch.cat((albef_features, geoloc), 1)
+        
+        logits = self.classifier(features)
         return logits
 
 

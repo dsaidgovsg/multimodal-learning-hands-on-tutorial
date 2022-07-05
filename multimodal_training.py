@@ -14,10 +14,11 @@ import pandas as pd
 from vl_model import create_model
 import random
 import numpy as np
+from ast import literal_eval
 
 
 class VLDataset(Dataset):
-    def __init__(self, df, label_to_id, train=False, text_field="text", label_field="label", image_path_field=None, image_model_type=None):
+    def __init__(self, df, label_to_id, train=False, text_field="text", label_field="label", image_path_field=None, image_model_type=None, geoloc_start=None, geoloc_end=None):
         self.df = df.reset_index()
         self.label_to_id = label_to_id
         self.train = train
@@ -25,6 +26,8 @@ class VLDataset(Dataset):
         self.label_field = label_field
         self.image_path_field = image_path_field
         self.image_model_type = image_model_type
+        self.geoloc_start = geoloc_start
+        self.geoloc_end = geoloc_end
 
         # text only dataset
         if image_model_type is not None:
@@ -58,10 +61,15 @@ class VLDataset(Dataset):
     def __getitem__(self, index):
         text = str(self.df.at[index, self.text_field])
         label = self.label_to_id[self.df.at[index, self.label_field]]
+        
+        if self.geoloc_start is not None and self.geoloc_end is not None:
+            geolocs = self.df.iloc[index, self.geoloc_start: self.geoloc_end].tolist()
+        else:
+            geolocs = None
 
         # return images only if image model is specified
         if self.image_model_type is not None:
-            img_path = self.df.at[index, self.image_path_field]
+            img_path = literal_eval(self.df.at[index, self.image_path_field])[0]
 
         
             image = Image.open(img_path)
@@ -70,9 +78,15 @@ class VLDataset(Dataset):
             else:
                 img = self.eval_transform_func(image)
 
+            if geolocs is not None:
+                return text, label, geolocs
+            
             return text, label, img
         
         else:
+            if geolocs is not None:
+                return text, label
+ 
             return text, label
 
     def __len__(self):
@@ -102,6 +116,9 @@ class VLClassifier:
         text_field = training_args.get('text_field')
         label_field = training_args.get('label_field')
         image_path_field = training_args.get('image_path_field')
+        geoloc_start = training_args.get('geoloc_start_index')
+        geoloc_end = training_args.get('geoloc_end_index')
+
         # albef_directory = training_args.get('albef_pretrained_folder', None)
 
         self.label_to_id = {lab:i for i, lab in enumerate(df_train['label'].unique())}
@@ -111,7 +128,7 @@ class VLClassifier:
         self.model = create_model(self.image_model_type, self.num_labels, text_pretrained='bert-base-uncased')
         self.model.to(self.device)
 
-        train_dataset = VLDataset(df=df_train, label_to_id=self.label_to_id, train=True, text_field=text_field, label_field=label_field, image_path_field=image_path_field, image_model_type=self.image_model_type)
+        train_dataset = VLDataset(df=df_train, label_to_id=self.label_to_id, train=True, text_field=text_field, label_field=label_field, image_path_field=image_path_field, image_model_type=self.image_model_type, geoloc_start_ind=geoloc_start, geoloc_end_ind=geoloc_end)
         train_sampler = RandomSampler(train_dataset)        
         train_dataloader = DataLoader(dataset=train_dataset,
                             batch_size=batch_size, 
@@ -123,7 +140,9 @@ class VLClassifier:
 
         optimizer = AdamW(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         # scheduler = get_scheduler(name="linear", optimizer=optimizer, num_warmup_steps=warmup_steps, num_training_steps=t_total)
-        scheduler = get_scheduler(name="constant", optimizer=optimizer)
+        # scheduler = get_scheduler(name="constant", optimizer=optimizer)
+        scheduler = get_scheduler(name="cosine", optimizer=optimizer, num_warmup_steps=warmup_steps, num_training_steps=t_total)
+
 
         tr_loss = 0.0
 
@@ -137,10 +156,24 @@ class VLClassifier:
             
             for step, batch in tqdm(enumerate(train_dataloader), total=len(train_dataloader), desc='Batch'):        
                 if self.image_model_type is None:
-                    b_text, b_labels = batch
                     b_imgs = None
+
+                    if geoloc_start is not None and geoloc_end is not None:
+                        b_text, b_labels, b_geolocs = batch
+                    else:
+                        b_text, b_labels = batch
+                        b_geolocs = None
+                    
+
+
+
                 else:
-                    b_text, b_labels, b_imgs = batch
+                    if geoloc_start is not None and geoloc_end is not None:
+                        b_text, b_labels, b_imgs, b_geolocs = batch
+
+                    else:
+                        b_text, b_labels, b_imgs = batch
+                        b_geolocs = None
 
                 b_inputs = self.tokenizer(
                     list(b_text), truncation=True, max_length=max_seq_length,
@@ -156,9 +189,9 @@ class VLClassifier:
                 self.model.zero_grad()
 
                 if b_imgs is None:        
-                    b_logits = self.model(text=b_inputs)
+                    b_logits = self.model(text=b_inputs, geolocs=b_geolocs)
                 else:
-                    b_logits = self.model(text=b_inputs, image=b_imgs)
+                    b_logits = self.model(text=b_inputs, image=b_imgs, geoloc=b_geolocs)
                 
                 loss = criterion(b_logits, b_labels)
 
@@ -191,11 +224,13 @@ class VLClassifier:
         text_field = eval_args.get('text_field')
         image_path_field = eval_args.get('image_path_field')
         label_field = eval_args.get('label_field', None)
+        geoloc_start = eval_args.get('geoloc_start_index', geoloc_start)
+        geoloc_end = eval_args.get('geoloc_end_index', geoloc_end)
 
 
         prediction_results = []
 
-        test_dataset = VLDataset(df=df_test, label_to_id=self.label_to_id, train=False, text_field=text_field, label_field=label_field, image_path_field=image_path_field, image_model_type=self.image_model_type)
+        test_dataset = VLDataset(df=df_test, label_to_id=self.label_to_id, train=False, text_field=text_field, label_field=label_field, image_path_field=image_path_field, image_model_type=self.image_model_type, geoloc_start_ind=geoloc_start, geoloc_end_ind=geoloc_end)
         test_sampler = SequentialSampler(test_dataset)        
         test_dataloader = DataLoader(dataset=test_dataset,
                                     batch_size=batch_size, 
@@ -206,11 +241,21 @@ class VLClassifier:
             self.model.eval()
 
             if self.image_model_type is None:
-                b_text, b_labels = batch
                 b_imgs = None
+                if geoloc_start is not None and geoloc_end is not None:
+                    b_text, b_labels, b_geolocs = batch
+                else:
+                    b_text, b_labels = batch
+                    b_geolocs = None
+                    
             
             else:
-                b_text, b_labels, b_imgs = batch
+                if geoloc_start is not None and geoloc_end is not None:
+                    b_text, b_labels, b_imgs, b_geolocs = batch
+
+                else:
+                    b_text, b_labels, b_imgs = batch
+                    b_geolocs = None
 
             b_inputs = self.tokenizer(list(b_text), truncation=True, max_length=max_seq_length, return_tensors="pt", padding=True)
 
@@ -317,34 +362,39 @@ def set_seed(seed_val):
     torch.cuda.manual_seed_all(seed_val)
 
 def main():
-    home_folder = './KDD/'
-    data_folder = home_folder + 'webvision_data/'
-    image_folder = data_folder + 'images/'
+    home_folder = '/dbfs/FileStore/tables/watsonchua/work/mso_feedback_classification/image_train_test/full_dataset_chatbot/agency/'
+    # data_folder = home_folder + 'webvision_data/'
+    # image_folder = data_folder + 'images/'
     results_folder = home_folder + 'results/'
-    albef_folder = home_folder + 'albef'
+    # albef_folder = home_folder + 'albef'
     os.makedirs(results_folder, exist_ok=True)
 
-    df_train = pd.read_csv(data_folder + 'train.csv')
-    df_test = pd.read_csv(data_folder + 'test.csv')
+    # df_train = pd.read_csv(data_folder + 'train.csv')
+    # df_test = pd.read_csv(data_folder + 'test.csv')
+
+    df_train = pd.read_csv(home_folder + 'train_with_images_no_tc_half.csv')
+    df_test = pd.read_csv(home_folder + 'test_with_images_no_tc_half.csv')
 
     seed_val = 0
     
 
     args = {
         'batch_size': 16,
-        'num_train_epochs': 5,
+        'num_train_epochs': 20,
         'learning_rate': 1.0e-5,
         'weight_decay': 0.01,
         'warmup_steps': 0,
-        'max_seq_length': 64 ,
-        'text_field': 'text',
-        'label_field': 'label',
-        'image_path_field': 'img_path',
+        'max_seq_length': 200 ,
+        'text_field': 'processed_description',
+        'label_field': 'agency',
+        'image_path_field': 'image_paths',
+        'geoloc_start_index': 1,
+        'geoloc_end_index': 15,
         # 'albef_pretrained_folder': albef_folder
     }
 
-    df_train[args['image_path_field']] = df_train[args['image_path_field']].apply(lambda x: image_folder + x)
-    df_test[args['image_path_field']] = df_test[args['image_path_field']].apply(lambda x: image_folder + x)
+    # df_train[args['image_path_field']] = df_train[args['image_path_field']].apply(lambda x: image_folder + x)
+    # df_test[args['image_path_field']] = df_test[args['image_path_field']].apply(lambda x: image_folder + x)
     
     set_seed(seed_val)
     classifier_train_test(df_train, df_test, classifier_type="bert", output_folder=results_folder, args=args)
