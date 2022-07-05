@@ -189,7 +189,7 @@ class VLClassifier:
                 self.model.zero_grad()
 
                 if b_imgs is None:        
-                    b_logits = self.model(text=b_inputs, geolocs=b_geolocs)
+                    b_logits = self.model(text=b_inputs, geoloc=b_geolocs)
                 else:
                     b_logits = self.model(text=b_inputs, image=b_imgs, geoloc=b_geolocs)
                 
