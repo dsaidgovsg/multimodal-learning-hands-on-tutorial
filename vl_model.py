@@ -65,6 +65,7 @@ class BertResNetModel(nn.Module):
         text_output = self.text_encoder(**text)
         text_feature = text_output.last_hidden_state[:, 0, :]
         img_feature = self.visual_encoder(image)
+
         features = torch.cat((text_feature, img_feature), 1)
 
         logits = self.classifier(features)

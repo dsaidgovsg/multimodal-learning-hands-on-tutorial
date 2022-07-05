@@ -104,7 +104,7 @@ class VLClassifier:
         image_path_field = training_args.get('image_path_field')
         # albef_directory = training_args.get('albef_pretrained_folder', None)
 
-        self.label_to_id = {lab:i for i, lab in enumerate(df_train['label'].unique())}
+        self.label_to_id = {lab:i for i, lab in enumerate(df_train[label_field].unique())}
         self.id_to_label = {v:k for k,v in self.label_to_id.items()}
         self.num_labels = len(self.label_to_id)
 
@@ -122,8 +122,8 @@ class VLClassifier:
 
 
         optimizer = AdamW(self.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        # scheduler = get_scheduler(name="linear", optimizer=optimizer, num_warmup_steps=warmup_steps, num_training_steps=t_total)
-        scheduler = get_scheduler(name="constant", optimizer=optimizer)
+        scheduler = get_scheduler(name="cosine", optimizer=optimizer, num_warmup_steps=warmup_steps, num_training_steps=t_total)
+        # scheduler = get_scheduler(name="constant", optimizer=optimizer)
 
         tr_loss = 0.0
 
@@ -257,31 +257,30 @@ class VLClassifier:
             json.dump(parameters, f)
 
 
-    @classmethod
-    def from_pretrained(load_directory):
-        label_map_filepath = os.path.join(load_directory, "label_map.json")
-        with open(label_map_filepath, 'r') as f:
-            label_map = json.load(f)
+def from_pretrained(load_directory):
+    label_map_filepath = os.path.join(load_directory, "label_map.json")
+    with open(label_map_filepath, 'r') as f:
+        label_map = json.load(f)
 
-        parameters_filepath = os.path.join(load_directory, "parameters.json")
-        with open(parameters_filepath, 'r') as f:
-            parameters = json.load(f)
+    parameters_filepath = os.path.join(load_directory, "parameters.json")
+    with open(parameters_filepath, 'r') as f:
+        parameters = json.load(f)
 
-        image_model_type = parameters['image_model_type']
-        num_labels = parameters['num_labels']
+    image_model_type = parameters['image_model_type']
+    num_labels = parameters['num_labels']
 
-        tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+    tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
 
-        
-        model_sd_filepath = os.path.join(load_directory, "state_dict.pt")
-        model_sd = torch.load(model_sd_filepath, map_location='cpu')
+    
+    model_sd_filepath = os.path.join(load_directory, "state_dict.pt")
+    model_sd = torch.load(model_sd_filepath, map_location='cpu')
 
-        model = create_model(image_model_type=image_model_type, num_labels=num_labels)
-        model.to('cpu') # load all models in cpu first
-        model.load_state_dict(model_sd, strict=True)
-        
-        return VLClassifier(model=model, tokenizer=tokenizer, image_model_type=image_model_type, label_map=label_map)
+    model = create_model(image_model_type=image_model_type, num_labels=num_labels)
+    model.to('cpu') # load all models in cpu first
+    model.load_state_dict(model_sd, strict=True)
+    
+    return VLClassifier(model=model, tokenizer=tokenizer, image_model_type=image_model_type, label_map=label_map)
     
     
 
