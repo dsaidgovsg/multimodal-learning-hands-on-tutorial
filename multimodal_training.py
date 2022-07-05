@@ -229,8 +229,8 @@ class VLClassifier:
         text_field = eval_args.get('text_field')
         image_path_field = eval_args.get('image_path_field')
         label_field = eval_args.get('label_field', None)
-        geoloc_start = eval_args.get('geoloc_start_index', geoloc_start)
-        geoloc_end = eval_args.get('geoloc_end_index', geoloc_end)
+        geoloc_start = eval_args.get('geoloc_start_index')
+        geoloc_end = eval_args.get('geoloc_end_index')
 
 
         prediction_results = []
