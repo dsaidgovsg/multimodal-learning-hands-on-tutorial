@@ -18,7 +18,7 @@ from ast import literal_eval
 
 
 class VLDataset(Dataset):
-    def __init__(self, df, label_to_id, train=False, text_field="text", label_field="label", image_path_field=None, image_model_type=None, geoloc_start=None, geoloc_end=None):
+    def __init__(self, df, label_to_id, train=False, text_field="text", label_field="label", image_path_field=None, image_model_type=None, geoloc_start_ind=None, geoloc_end_ind=None):
         self.df = df.reset_index()
         self.label_to_id = label_to_id
         self.train = train
@@ -26,8 +26,8 @@ class VLDataset(Dataset):
         self.label_field = label_field
         self.image_path_field = image_path_field
         self.image_model_type = image_model_type
-        self.geoloc_start = geoloc_start
-        self.geoloc_end = geoloc_end
+        self.geoloc_start = geoloc_start_ind
+        self.geoloc_end = geoloc_end_ind
 
         # text only dataset
         if image_model_type is not None:
