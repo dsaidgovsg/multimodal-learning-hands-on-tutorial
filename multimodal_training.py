@@ -188,6 +188,9 @@ class VLClassifier:
                 if b_imgs is not None:
                     b_imgs = b_imgs.to(self.device)
 
+                if b_geolocs is not None:
+                    b_geolocs = b_geolocs.to(self.device)
+
                 self.model.zero_grad()
 
                 if b_imgs is None:        
@@ -266,11 +269,14 @@ class VLClassifier:
             if b_imgs is not None:
                 b_imgs = b_imgs.to(self.device)
 
+            if b_geolocs is not None:
+                    b_geolocs = b_geolocs.to(self.device)
+
             with torch.no_grad():
                 if b_imgs is None:
-                    b_logits = self.model(text=b_inputs)
+                    b_logits = self.model(text=b_inputs, geoloc=b_geolocs)
                 else:
-                    b_logits = self.model(text=b_inputs, image=b_imgs)
+                    b_logits = self.model(text=b_inputs, image=b_imgs, geoloc=b_geolocs)
 
 
                 b_logits = b_logits.detach().cpu()
