@@ -79,13 +79,13 @@ class VLDataset(Dataset):
                 img = self.eval_transform_func(image)
 
             if geolocs is not None:
-                return text, label, geolocs
+                return text, label, img, geolocs
             
             return text, label, img
         
         else:
             if geolocs is not None:
-                return text, label
+                return text, label, geolocs
  
             return text, label
 
