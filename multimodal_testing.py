@@ -9,35 +9,6 @@ import numpy as np
 from multimodal_training import VLClassifier, from_pretrained
 
 
-    
-# def classifier_train_test(df_train, df_test, classifier_type, output_folder, args):
-#     classifier_to_image_model_map = {
-#         "bert": None,
-#         "bert_resnet": "resnet",
-#         "albef": "albef"
-#     }
-
-#     image_model_type = classifier_to_image_model_map[classifier_type]    
-#     classifier = VLClassifier(image_model_type=image_model_type)
-#     classifier.train(df_train, args)
-#     predictions = classifier.predict(df_test, args)
-#     class_report = classification_report(df_test[args.get('label_field')], predictions, output_dict=True)
-
-#     with open(output_folder + classifier_type + '_class_report.json', 'w') as f:
-#         json.dump(class_report, f)
-    
-#     df_out = df_test.copy()
-#     df_out['prediction'] = predictions
-#     df_out.to_csv(output_folder + classifier_type + '_predictions.csv', index=False)
-
-#     model_save_dir = os.path.join(output_folder, classifier_type)
-#     os.makedirs(model_save_dir)
-#     classifier.save(model_save_dir)
-    
-
-
-
-
 def set_seed(seed_val):
     random.seed(seed_val)
     np.random.seed(seed_val)
