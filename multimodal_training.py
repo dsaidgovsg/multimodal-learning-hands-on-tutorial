@@ -121,7 +121,7 @@ class VLClassifier:
 
         # albef_directory = training_args.get('albef_pretrained_folder', None)
 
-        self.label_to_id = {lab:i for i, lab in enumerate(df_train['label'].unique())}
+        self.label_to_id = {lab:i for i, lab in enumerate(df_train[label_field].unique())}
         self.id_to_label = {v:k for k,v in self.label_to_id.items()}
         self.num_labels = len(self.label_to_id)
 
