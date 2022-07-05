@@ -63,7 +63,9 @@ class VLDataset(Dataset):
         label = self.label_to_id[self.df.at[index, self.label_field]]
         
         if self.geoloc_start is not None and self.geoloc_end is not None:
-            geolocs = self.df.iloc[index, self.geoloc_start: self.geoloc_end].to_numpy()
+            # geolocs = self.df.iloc[index, self.geoloc_start: self.geoloc_end].to_numpy()
+            geolocs = torch.tensor(self.df.iloc[index, self.geoloc_start: self.geoloc_end], dtype=torch.float32)
+
         else:
             geolocs = None
 
