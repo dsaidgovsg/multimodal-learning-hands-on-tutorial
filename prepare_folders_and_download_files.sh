@@ -28,16 +28,12 @@ fi
 
 
 
-# TRAINED_MODEL_FOLDER="./KDD/trained_models/"
-# if [ ! -d $TRAINED_MODEL_FOLDER ] 
-# then
-#     echo "Creating folder and downloading model files" 
-#     mkdir -p $TRAINED_MODEL_FOLDER/BERT
-#     wget "https://drive.google.com/uc?id=1hkc3iXG5xgnvV9ksnSf85OHzv3vApVAB&export=download" -O $TRAINED_MODEL_FOLDER/BERT/state_dict.pt
-#     mkdir -p $TRAINED_MODEL_FOLDER/BERT_ResNet
-#     wget "https://drive.google.com/uc?id=1a6skPhOMHX9i93q_arJGDbEr-nrPYyTj&export=download" -O $TRAINED_MODEL_FOLDER/BERT_ResNet/state_dict.pt
-#     mkdir -p $TRAINED_MODEL_FOLDER/ALBEF
-#     wget "https://drive.google.com/uc?id=1cZHmAfWBX525c9b_keQ3kle70_devGwm&export=download" -O $TRAINED_MODEL_FOLDER/ALBEF/state_dict.pt
-#     echo "Completed" 
-# fi
+HOME_FOLDER="./KDD"
+TRAINED_MODEL_FOLDER="./KDD/trained_models/"
+if [ ! -d $TRAINED_MODEL_FOLDER ] 
+then
+    echo "Creating folder and downloading model files" 
+    wget https://drive.google.com/u/0/uc?id=1MGaKK4nHTd4FWDnvFihb6b8lASjeuN_l&export=download&confirm=t -O $HOME_FOLDER/trained_models.zip
+    unzip $HOME_FOLDER/trained_models.zip -d $HOME_FOLDER
+fi
 
