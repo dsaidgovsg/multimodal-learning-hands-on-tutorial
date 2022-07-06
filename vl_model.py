@@ -22,8 +22,9 @@ class VLBertModel(nn.Module):
         
     
     def forward(self, text):
-        output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True)
-        logits = self.classifier(output.last_hidden_state[:, 0, :])
+        text_output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, return_dict=True)
+        text_feature = text_output.last_hidden_state[:, 0, :]
+        logits = self.classifier(text_feature)
         return logits
 
 
