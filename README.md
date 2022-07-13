@@ -18,7 +18,7 @@ The outline of the tutorial is as follows:
 5. Question and Answer/Discussion
 
 
-The tutorial will be conducted using [Google Colab]{https://colab.research.google.com/}. We will be using the file `multimodal_training.ipynb` for the session. To run the notebook on Colab: 
+The tutorial will be conducted using [Google Colab](https://colab.research.google.com/). We will be using the file `multimodal_training.ipynb` for the session. To run the notebook on Colab: 
 1. Fo to the GitHub option and search for `dsaidgovsg/multimodal-learning-hands-on-tutorial`
 2. Select the `main` branch
 3. Open `multimodal_training.ipynb`
