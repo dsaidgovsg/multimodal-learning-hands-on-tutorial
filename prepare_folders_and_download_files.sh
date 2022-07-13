@@ -13,21 +13,6 @@ then
 fi
 
 
-
-# ALBEF_FOLDER="./KDD/albef/"
-
-# if [ ! -d $ALBEF_FOLDER ] 
-# then
-#     echo "Creating albef folder and downloading model files" 
-#     # download albef files
-#     mkdir -p $ALBEF_FOLDER
-#     wget https://storage.googleapis.com/sfr-pcl-data-research/ALBEF/ALBEF_4M.pth -O $ALBEF_FOLDER/ALBEF.pth
-#     wget https://raw.githubusercontent.com/salesforce/ALBEF/main/configs/config_bert.json -O $ALBEF_FOLDER/config_bert.json
-#     echo "Completed" 
-# fi
-
-
-
 HOME_FOLDER="./KDD"
 TRAINED_MODEL_FOLDER="./KDD/trained_models/"
 if [ ! -d $TRAINED_MODEL_FOLDER ] 
