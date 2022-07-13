@@ -18,4 +18,23 @@ The outline of the tutorial is as follows:
 5. Question and Answer/Discussion
 
 
-The tutorial will be conducted using Google Colab. We will be using the file `multimodal_training.ipynb` for the session.
+The tutorial will be conducted using [Google Colab]{https://colab.research.google.com/}. We will be using the file `multimodal_training.ipynb` for the session. To run the notebook on Colab: 
+1. Fo to the GitHub option and search for `dsaidgovsg/multimodal-learning-hands-on-tutorial`
+2. Select the `main` branch
+3. Open `multimodal_training.ipynb`
+4. Follow the instructions in the cells
+
+
+## Running the Python Script
+The content in the notebook is meant to be a step-by-step guide to show the difference between the difference model architectures, thus the code can be quite repetitve.
+
+We have also streamlined the code into python script which you can run from the terminal to train the models or do prediction from pretrained models. Steps to run the scripts are as follows:
+1. If you have not already done so, clone this repo to your working directory `git clone https://github.com/dsaidgovsg/multimodal-learning-hands-on-tutorial.git`
+2. Inside your working directory, run `bash prepare_folders_and_download_files.sh` . The script will create the folder structure and download the files used during the tutorial into these folders.
+3. Install the libraries required via `pip install -r requirements.txt`
+4. To do prediction on the test set using the downloaded pretrained models trained for 20 iterations, run `python3 multimodal_testing.py`
+5. To do your own training and prediction, run `python3 multimodal_training.py`. Edit the `args` dictionary in the `main` function if you want to change the training parameters.
+
+
+
+
