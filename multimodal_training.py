@@ -3,10 +3,10 @@ import os
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from sklearn.metrics import accuracy_score, classification_report
-from transformers import AutoModel, AutoTokenizer, get_scheduler
+from sklearn.metrics import classification_report
+from transformers import AutoTokenizer, get_scheduler
 from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
-from torch.optim import AdamW, lr_scheduler
+from torch.optim import AdamW
 from tqdm.auto import tqdm, trange
 from time import perf_counter
 from PIL import Image
@@ -18,7 +18,7 @@ import numpy as np
 
 class VLDataset(Dataset):
     def __init__(self, df, label_to_id, train=False, text_field="text", label_field="label", image_path_field=None, image_model_type=None):
-        self.df = df.reset_index()
+        self.df = df.reset_index(drop=True)
         self.label_to_id = label_to_id
         self.train = train
         self.text_field = text_field
@@ -320,7 +320,6 @@ def main():
     data_folder = home_folder + 'webvision_data/'
     image_folder = data_folder + 'images/'
     results_folder = home_folder + 'results/'
-    albef_folder = home_folder + 'albef'
     os.makedirs(results_folder, exist_ok=True)
 
     df_train = pd.read_csv(data_folder + 'train.csv')
@@ -339,7 +338,6 @@ def main():
         'text_field': 'text',
         'label_field': 'label',
         'image_path_field': 'img_path',
-        # 'albef_pretrained_folder': albef_folder
     }
 
     df_train[args['image_path_field']] = df_train[args['image_path_field']].apply(lambda x: image_folder + x)
