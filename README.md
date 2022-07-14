@@ -36,6 +36,14 @@ Steps to run the scripts are as follows:
 4. To do prediction on the test set using the downloaded pretrained models trained for 20 iterations, run `python3 multimodal_testing.py`
 5. To do your own training and prediction, run `python3 multimodal_training.py`. Edit the `args` dictionary in the `main` function if you want to change the training parameters.
 
+**Disclaimer**
+
+The following source files in this repo were copied from [ALBEF's GitHub repo](https://github.com/salesforce/ALBEF) (click on filename to go to the original file location in ALBEF's GitHub repo): 
+1. [tokenization_bert.py](https://github.com/salesforce/ALBEF/blob/main/models/tokenization_bert.py) 
+2. [vit.py](https://github.com/salesforce/ALBEF/blob/main/models/vit.py)
+3. [xbert.py](https://github.com/salesforce/ALBEF/blob/main/models/xbert.py)
+
+We copied the files so that our code to train the ALBEF models can be run without having to download and copy source files from another site. We also made minor modifications so that the files are compatible with the latest version of Hugging Face Transformers. The rights and ownership of the code belongs to Salesforce, and ALBEF's author, Junnan Li.
 
 ## Model Architectures
 We will be using three different model architectures in the tutorial. Their architecture diagrams are shown below.
@@ -52,7 +60,9 @@ A dual encoder which comprises a separate text encoder (BERT) and an image encod
 ![](https://drive.google.com/uc?export=view&id=1JIQ4ugkqFRv5pRV4HKJampR66Bg9U_ff)
 
 
-### ALBEF (ALign BEfore Fuse)
+### ALBEF
 A joint text-image encoder which aligns the BERT text encoder's embeddings with the image encoder's (Vision Transformers).
 
 ![](https://drive.google.com/uc?export=view&id=1DbSpVq6BLaF_RNfjg58W3q7Nhy-DJOnj)
+
+
