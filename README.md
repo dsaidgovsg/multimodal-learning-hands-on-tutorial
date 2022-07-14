@@ -4,7 +4,7 @@
 The increasing prevalence of multimodal data in our society has led to the increased need for machines to make sense of such data holistically However, data scientists and machine learning engineers aspiring to work on such data face challenges fusing the knowledge from existing tutorials which often deal with each mode separately. Drawing on our experience in classifying multimodal municipal issue feedback in the Singapore government, we conduct a hands-on tutorial to help flatten the learning curve for practitioners who want to apply machine learning to multimodal data.
 
 ## Dataset
-Unfortunately, we are not able to conduct the tutorial using the municipal issue feedback data due to its sensitivity. Instead, we use a subset of the WebVision data. This dataset consists of labelled images, together with descriptions of them, crawled from the web. We chose this dataset because of its similar characteristics to our municipal issue feedback data (text descriptions correlate highly with the labels but associated images provide even better context).
+Unfortunately, we are not able to conduct the tutorial using the municipal issue feedback data due to its sensitivity. Instead, we use a subset of the [WebVision](https://data.vision.ee.ethz.ch/cvl/webvision/dataset2017.html) dataset. This dataset consists of labelled images, together with descriptions of them, crawled from the web. We chose this dataset because of its similar characteristics to our municipal issue feedback data (text descriptions correlate highly with the labels but associated images provide even better context).
 
 ## Tutorial Outline
 In this tutorial, we teach participants how to classify multimodal data consisting of both text and images using Transformers. It
