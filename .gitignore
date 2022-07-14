@@ -6,4 +6,5 @@
 *.pth
 *.pt
 *.json
+*.png
 *__MACOSX*
