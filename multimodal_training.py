@@ -41,9 +41,13 @@ class VLDataset(Dataset):
         if image_model_type is not None:
 
             # ResNet-50 and ALBEF use different image sizes
-            if image_model_type.lower() == "resnet":  # ResNet-50 settings
+
+            if image_model_type.lower() == "resnet":
+                # ResNet-50 settings
                 self.img_size = 224
-            elif image_model_type.lower() == "albef":  # ALBEF settings
+
+            elif image_model_type.lower() == "albef":
+                # ALBEF settings
                 self.img_size = 256
 
             self.mean, self.std = (0.48145466, 0.4578275, 0.40821073), (
