@@ -51,18 +51,18 @@ We will be using three different model architectures in the tutorial. Their arch
 ### BERT
 A text-encoder model which uses only the text to predict the label.
 
-![](https://drive.google.com/uc?export=view&id=180SkYMnUbLJCF5gcRaVGNy6wa7boMeCG)
+![](https://drive.google.com/uc?export=view&id=1nlBu9P8saotjNg_nv_tfdnTxpxaFAhqq)
 
 
 ### BERT-ResNet
 A dual encoder which comprises a separate text encoder (BERT) and an image encoder (ResNet-50).
 
-![](https://drive.google.com/uc?export=view&id=1JIQ4ugkqFRv5pRV4HKJampR66Bg9U_ff)
+![](https://drive.google.com/uc?export=view&id=1vFL3V1LdRlamLjkoI7ieoimxbwGnR7mU)
 
 
 ### ALBEF
 A joint text-image encoder which aligns the BERT text encoder's embeddings with the image encoder's (Vision Transformers).
 
-![](https://drive.google.com/uc?export=view&id=1DbSpVq6BLaF_RNfjg58W3q7Nhy-DJOnj)
+![](https://drive.google.com/uc?export=view&id=1zcBBx08_7ujlH2RS2WZrmTZ--Icsk4NN)
 
 
