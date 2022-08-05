@@ -158,6 +158,10 @@ class VLClassifier:
         geoloc_start = training_args.get("geoloc_start_index")
         geoloc_end = training_args.get("geoloc_end_index")
         lr_scheduler = training_args.get("lr_scheduler", "cosine")
+        if geoloc_start is not None and geoloc_end is not None:
+            num_geoloc_features = geoloc_end - geoloc_start
+        else:
+            num_geoloc_features = 0
 
         # albef_directory = training_args.get('albef_pretrained_folder', None)
 
@@ -168,7 +172,10 @@ class VLClassifier:
         self.num_labels = len(self.label_to_id)
 
         self.model = create_model(
-            self.image_model_type, self.num_labels, text_pretrained=pretrained
+            self.image_model_type,
+            self.num_labels,
+            text_pretrained=pretrained,
+            geoloc_features=num_geoloc_features,
         )
         self.model.to(self.device)
 
