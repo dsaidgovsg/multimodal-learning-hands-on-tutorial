@@ -3,7 +3,7 @@ pretrained : "google/bert_uncased_L-2_H-128_A-2"
 train_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/train_with_images_one_image.csv"
 test_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/test_with_images_one_image.csv"
 output_folder: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/results/text_geolocs_bert_tiny/"
-batch_size": 8
+batch_size: 8
 num_train_epochs: 9
 learning_rate: 0.0008930676276027413
 weight_decay: 0
