@@ -273,8 +273,8 @@ class VLClassifier:
             print("    learning rate =", optimizer.param_groups[0]["lr"])
 
         end = perf_counter()
-        training_time = end - start
-        print("Training completed in ", training_time, "seconds")
+        self.training_time = end - start
+        print("Training completed in ", self.training_time, "seconds")
 
     def predict(self, df_test, eval_args):
         batch_size = eval_args.get("batch_size")
@@ -303,6 +303,7 @@ class VLClassifier:
             dataset=test_dataset, batch_size=batch_size, sampler=test_sampler
         )
 
+        predict_start = perf_counter()
         for batch in tqdm(test_dataloader):
             self.model.eval()
 
@@ -347,7 +348,10 @@ class VLClassifier:
                 b_logits = b_logits.detach().cpu()
 
             prediction_results += torch.argmax(b_logits, dim=-1).tolist()
+        predict_end = perf_counter()
 
+        self.prediction_time = predict_end - predict_start
+        print("Prediction completed in ", self.prediction_time, "seconds")
         prediction_labels = [self.id_to_label[p] for p in prediction_results]
 
         return prediction_labels
@@ -413,6 +417,8 @@ def classifier_train_test(df_train, df_test, classifier_type, output_folder, arg
     class_report = classification_report(
         df_test[args.get("label_field")], predictions, output_dict=True
     )
+    class_report["total_training_time"] = classifier.training_time
+    class_report["total_prediction_time"] = classifier.prediction_time
 
     with open(output_folder + classifier_type + "_class_report.json", "w") as f:
         json.dump(class_report, f)
