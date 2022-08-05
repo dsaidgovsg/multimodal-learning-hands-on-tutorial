@@ -1,0 +1,17 @@
+
+pretrained : "bert-base-uncased"
+train_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/train_with_images.csv"
+test_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/test_with_images.csv"
+output_folder: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/results/text_geolocs_images_albef/"
+batch_size: 16
+num_train_epochs: 15
+learning_rate: 2.0e-5
+weight_decay: 0
+warmup_steps: 0
+max_seq_length: 210
+text_field: cat_description
+label_field: agency
+image_path_field: images_path
+geoloc_start_index: 1
+geoloc_end_index: 15
+lr_scheduler: "cosine"
