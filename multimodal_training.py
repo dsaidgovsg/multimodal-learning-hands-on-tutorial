@@ -119,11 +119,16 @@ class VLDataset(Dataset):
 
 class VLClassifier:
     def __init__(
-        self, model=None, tokenizer=None, image_model_type=None, label_map=None
+        self,
+        model=None,
+        tokenizer=None,
+        image_model_type=None,
+        label_map=None,
+        pretrained="bert-base-uncased",
     ):
         self.model = model
         self.tokenizer = (
-            AutoTokenizer.from_pretrained("bert-base-uncased")
+            AutoTokenizer.from_pretrained(pretrained)
             if tokenizer is None
             else tokenizer
         )
@@ -140,6 +145,7 @@ class VLClassifier:
 
     def train(self, df_train, training_args):
         self.training_args = training_args
+        pretrained = training_args.get("pretrained")
         batch_size = training_args.get("batch_size")
         num_train_epochs = training_args.get("num_train_epochs")
         learning_rate = training_args.get("learning_rate")
@@ -151,6 +157,7 @@ class VLClassifier:
         image_path_field = training_args.get("image_path_field")
         geoloc_start = training_args.get("geoloc_start_index")
         geoloc_end = training_args.get("geoloc_end_index")
+        lr_scheduler = training_args.get("lr_scheduler", "cosine")
 
         # albef_directory = training_args.get('albef_pretrained_folder', None)
 
@@ -161,7 +168,7 @@ class VLClassifier:
         self.num_labels = len(self.label_to_id)
 
         self.model = create_model(
-            self.image_model_type, self.num_labels, text_pretrained="bert-base-uncased"
+            self.image_model_type, self.num_labels, text_pretrained=pretrained
         )
         self.model.to(self.device)
 
@@ -186,10 +193,9 @@ class VLClassifier:
         optimizer = AdamW(
             self.model.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
-        # scheduler = get_scheduler(name="linear", optimizer=optimizer, num_warmup_steps=warmup_steps, num_training_steps=t_total)
-        # scheduler = get_scheduler(name="constant", optimizer=optimizer)
+
         scheduler = get_scheduler(
-            name="cosine",
+            name=lr_scheduler,
             optimizer=optimizer,
             num_warmup_steps=warmup_steps,
             num_training_steps=t_total,
@@ -427,39 +433,46 @@ def set_seed(seed_val):
     torch.cuda.manual_seed_all(seed_val)
 
 
+import yaml
+import argparse
+
+
 def main():
-    home_folder = "/dbfs/FileStore/tables/watsonchua/work/mso_feedback_classification/image_train_test/full_dataset_chatbot/agency/"
-    # data_folder = home_folder + 'webvision_data/'
-    # image_folder = data_folder + 'images/'
-    results_folder = home_folder + "results/"
-    # albef_folder = home_folder + 'albef'
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c", "--config", type=str, required=True, help="path to yaml config"
+    )
+    args = parser.parse_args()
+
+    yaml_config = yaml.parse(args.config)
+
+    results_folder = yaml_config.get("output_folder")
     os.makedirs(results_folder, exist_ok=True)
 
-    # df_train = pd.read_csv(data_folder + 'train.csv')
-    # df_test = pd.read_csv(data_folder + 'test.csv')
+    train_path = yaml_config.get("train_path")
+    test_path = yaml_config.get("test_path")
 
-    df_train = pd.read_csv(home_folder + "train_with_images_no_tc_half.csv")
-    df_test = pd.read_csv(home_folder + "test_with_images_no_tc_half.csv")
+    df_train = pd.read_csv(train_path)
+    df_test = pd.read_csv(test_path)
 
     seed_val = 0
 
     args = {
-        "batch_size": 16,
-        "num_train_epochs": 20,
-        "learning_rate": 1.0e-5,
-        "weight_decay": 0.01,
-        "warmup_steps": 0,
-        "max_seq_length": 200,
-        "text_field": "processed_description",
-        "label_field": "agency",
-        "image_path_field": "image_paths",
-        "geoloc_start_index": 1,
-        "geoloc_end_index": 15,
+        "pretrained": yaml_config.get("pretrained"),
+        "batch_size": yaml_config.get("batch_size"),
+        "num_train_epochs": yaml_config.get("num_train_epochs"),
+        "learning_rate": yaml_config.get("learning_rate"),
+        "weight_decay": yaml_config.get("weight_decay"),
+        "warmup_steps": yaml_config.get("warmup_steps"),
+        "max_seq_length": yaml_config.get("max_seq_length"),
+        "text_field": yaml_config.get("text_field"),
+        "label_field": yaml_config.get("label_field"),
+        "image_path_field": yaml_config.get("image_path_field"),
+        "geoloc_start_index": yaml_config.get("geoloc_start_index"),
+        "geoloc_end_index": yaml_config.get("geoloc_end_index"),
+        "lr_scheduler": yaml_config.get("lr_scheduler"),
         # 'albef_pretrained_folder': albef_folder
     }
-
-    # df_train[args['image_path_field']] = df_train[args['image_path_field']].apply(lambda x: image_folder + x)
-    # df_test[args['image_path_field']] = df_test[args['image_path_field']].apply(lambda x: image_folder + x)
 
     set_seed(seed_val)
     classifier_train_test(
@@ -469,22 +482,22 @@ def main():
         output_folder=results_folder,
         args=args,
     )
-    set_seed(seed_val)
-    classifier_train_test(
-        df_train,
-        df_test,
-        classifier_type="bert_resnet",
-        output_folder=results_folder,
-        args=args,
-    )
-    set_seed(seed_val)
-    classifier_train_test(
-        df_train,
-        df_test,
-        classifier_type="albef",
-        output_folder=results_folder,
-        args=args,
-    )
+    # set_seed(seed_val)
+    # classifier_train_test(
+    #     df_train,
+    #     df_test,
+    #     classifier_type="bert_resnet",
+    #     output_folder=results_folder,
+    #     args=args,
+    # )
+    # set_seed(seed_val)
+    # classifier_train_test(
+    #     df_train,
+    #     df_test,
+    #     classifier_type="albef",
+    #     output_folder=results_folder,
+    #     args=args,
+    # )
 
 
 if __name__ == "__main__":
