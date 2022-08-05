@@ -175,7 +175,7 @@ class VLClassifier:
             self.image_model_type,
             self.num_labels,
             text_pretrained=pretrained,
-            geoloc_features=num_geoloc_features,
+            num_geoloc_features=num_geoloc_features,
         )
         self.model.to(self.device)
 
@@ -393,12 +393,24 @@ def from_pretrained(load_directory):
     image_model_type = parameters["image_model_type"]
     num_labels = parameters["num_labels"]
 
+    geoloc_start_index = parameters.get("geoloc_start_index")
+    geoloc_end_index = parameters.get("geoloc_end_index")
+
+    if geoloc_start_index is not None and geoloc_end_index is not None:
+        num_geoloc_features = geoloc_end_index - geoloc_start_index
+    else:
+        num_geoloc_features = 0
+
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
     model_sd_filepath = os.path.join(load_directory, "state_dict.pt")
     model_sd = torch.load(model_sd_filepath, map_location="cpu")
 
-    model = create_model(image_model_type=image_model_type, num_labels=num_labels)
+    model = create_model(
+        image_model_type=image_model_type,
+        num_labels=num_labels,
+        num_geoloc_features=num_geoloc_features,
+    )
     model.to("cpu")  # load all models in cpu first
     model.load_state_dict(model_sd, strict=True)
 
