@@ -3,3 +3,4 @@ transformers
 torchvision
 sklearn
 timm
+pre-commit

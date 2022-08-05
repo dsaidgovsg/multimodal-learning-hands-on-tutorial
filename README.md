@@ -1,18 +1,68 @@
-# Classifying Multimodal Data using Transformers: Applications to Municipal Issue Feedback in the Singapore Government
+# Classifying Multimodal Data using Transformers
 
-In this tutorial, we will teach participants how to classify municipal issue feedback cases so that they get assigned to the agency most suited to handle the case. The data, proprietary to the government of Singapore, consists of feedback submitted by the public and each feedback consists of a textual description of the issue, and an accompanying image.
+## Motivation
+The increasing prevalence of multimodal data in our society has led to the increased need for machines to make sense of such data holistically. However, data scientists and machine learning engineers aspiring to work on such data face challenges fusing the knowledge from existing tutorials which often deal with each mode separately. Drawing on our experience in [classifying multimodal municipal issue feedback in the Singapore government](https://medium.com/dsaid-govtech/training-the-oneservice-chatbot-to-analyse-feedback-on-municipal-issues-using-natural-language-4302aa5a3946), we conduct a hands-on tutorial to help flatten the learning curve for practitioners who want to apply machine learning to multimodal data.
 
-We will first teach the participants how to classify the feedback using the textual description alone using Transformers. This will be done using the Hugging Face Transformers library in PyTorch.
+## Dataset
+Unfortunately, we are not able to conduct the tutorial using the municipal issue feedback data due to its sensitivity. Instead, we use a subset of the [WebVision](https://data.vision.ee.ethz.ch/cvl/webvision/dataset2017.html) dataset. This dataset consists of labelled images, together with descriptions of them, crawled from the web. We chose this dataset because of its similar characteristics to our municipal issue feedback data (text descriptions correlate highly with the labels but associated images provide even better context).
 
-Next, we will use ResNet-50 to get features from the images submitted and add them to the text model to train a new text + image model. We then compare the accuracy of this model with the one using text alone.
+## Tutorial Outline
+In this tutorial, we teach participants how to classify multimodal data consisting of both text and images using Transformers. It is targeted at an audience who have some familiarity with neural networks and are comfortable with writing code.
 
-Following that, we use a different model architecture, Align before Fuse (ALBEF) by SalesForce, which aligns the image and text representations before fusing them through cross-modal attention, and compare the model’s accuracy with the previous text and image model whose representations are unaligned.
+The outline of the tutorial is as follows:
+1. **Sharing of Experience**: Municipal issue feedback classification in the Singapore government
+2. **Text Classification**: Train a text classification model using [BERT](https://arxiv.org/abs/1810.04805)
+3. **Text and Image Classification (v1)**: Train a dual-encoder text and image classification model using BERT and [ResNet-50](https://arxiv.org/abs/1512.03385)
+4. **Text and Image Classification (v2)**: Train a joint-encoder text and image classification model using ALign BEfore Fuse ([ALBEF](https://github.com/salesforce/ALBEF))
+5. **Question and Answer/Discussion**
 
-The outline of the tutorial is given below:
-- Setting up the environment and loading the data
-- Data exploration - Examine samples from the dataset to understand the municipal issue feedback
-- Quick introduction on how to use the Hugging Face Transformers library
-- Text Classification - Train a sequence classification model using the Hugging Face Transformers library that can predict the correct handling agency, using the textual description only
-- Text + Image Classification (v1) - Combine the textual model with ResNet-50 image features from the images submitted to build an improved model
-- Text + Image Classification (v2) - Train another text + image model with ALBEF and compare its performance with the previous model
-- Question and Answer/Discussion 
+### Running the Notebook
+The tutorial will be conducted using [Google Colab](https://colab.research.google.com/). We will be using the file `multimodal_training.ipynb` for the session. To run the notebook on Colab: 
+1. Go to the GitHub option and search for `dsaidgovsg/multimodal-learning-hands-on-tutorial`
+2. Select the `main` branch
+3. Open `multimodal_training.ipynb`
+4. Follow the instructions in the cells
+
+
+### Running the Python Script (Optional)
+The content in the notebook is meant to be a step-by-step guide to show the difference between the difference model architectures. Thus, the code can be quite repetitve.
+
+We have streamlined the code into a python script which you can run from the terminal to train the models or do prediction from pretrained models. 
+
+Steps to run the scripts are as follows:
+1. If you have not already done so, clone this repo to your working directory `git clone https://github.com/dsaidgovsg/multimodal-learning-hands-on-tutorial.git`
+2. Inside your working directory, run `bash prepare_folders_and_download_files.sh` . The script will create the folder structure and download the files used during the tutorial into these folders.
+3. Install the libraries required via `pip install -r requirements.txt`
+4. To do prediction on the test set using the downloaded pretrained models trained for 20 iterations, run `python3 multimodal_testing.py`
+5. To do your own training and prediction, run `python3 multimodal_training.py`. Edit the `args` dictionary in the `main` function if you want to change the training parameters.
+
+**Disclaimer**
+
+The following source files in this repo were copied from [ALBEF's GitHub repo](https://github.com/salesforce/ALBEF) (click on filename to go to the original file location in ALBEF's GitHub repo): 
+1. [tokenization_bert.py](https://github.com/salesforce/ALBEF/blob/main/models/tokenization_bert.py) 
+2. [vit.py](https://github.com/salesforce/ALBEF/blob/main/models/vit.py)
+3. [xbert.py](https://github.com/salesforce/ALBEF/blob/main/models/xbert.py)
+
+We copied the files so that our code to train the ALBEF models can be run without having to download and copy source files from another site. We also made minor modifications so that the files are compatible with the latest version of Hugging Face Transformers. The rights and ownership of the code belongs to Salesforce, and ALBEF's author, Junnan Li.
+
+## Model Architectures
+We will be using three different model architectures in the tutorial. Their architecture diagrams are shown below.
+
+### BERT
+A text-encoder model which uses only the text to predict the label.
+
+![](https://drive.google.com/uc?export=view&id=1nlBu9P8saotjNg_nv_tfdnTxpxaFAhqq)
+
+
+### BERT-ResNet
+A dual encoder which comprises a separate text encoder (BERT) and an image encoder (ResNet-50).
+
+![](https://drive.google.com/uc?export=view&id=1vFL3V1LdRlamLjkoI7ieoimxbwGnR7mU)
+
+
+### ALBEF
+A joint text-image encoder which aligns the BERT text encoder's embeddings with the image encoder's (Vision Transformers).
+
+![](https://drive.google.com/uc?export=view&id=1zcBBx08_7ujlH2RS2WZrmTZ--Icsk4NN)
+
+
