@@ -141,7 +141,7 @@ class AlbefModel(nn.Module):
         logits = self.classifier(features)
         return logits
 
-    def load_albef_pretrained(num_out_labels):
+    def load_albef_pretrained(num_out_labels, geoloc_features=14):
         tmp_directory = "./tmp/albef"
         os.makedirs(tmp_directory, exist_ok=True)
 
@@ -162,7 +162,9 @@ class AlbefModel(nn.Module):
 
         albef_bert_config = AlbefBertConfig.from_json_file(albef_bert_config_fp)
         albef_model = AlbefModel(
-            bert_config=albef_bert_config, num_labels=num_out_labels
+            bert_config=albef_bert_config,
+            num_labels=num_out_labels,
+            geoloc_features=geoloc_features,
         )
 
         albef_checkpoint = torch.load(albef_model_fp, map_location="cpu")
@@ -180,10 +182,20 @@ class AlbefModel(nn.Module):
         return albef_model
 
 
-def create_model(image_model_type, num_labels, text_pretrained="bert-base-uncased"):
+def create_model(image_model_type, num_labels, text_pretrained, num_geoloc_features):
     if image_model_type is None:
-        return VLBertModel(num_labels, text_pretrained=text_pretrained)
+        return VLBertModel(
+            num_labels,
+            text_pretrained=text_pretrained,
+            geoloc_features=num_geoloc_features,
+        )
     elif image_model_type.lower().strip() == "resnet":
-        return BertResNetModel(num_labels, text_pretrained=text_pretrained)
+        return BertResNetModel(
+            num_labels,
+            text_pretrained=text_pretrained,
+            geoloc_features=num_geoloc_features,
+        )
     elif image_model_type.lower().strip() == "albef":
-        return AlbefModel.load_albef_pretrained(num_labels)
+        return AlbefModel.load_albef_pretrained(
+            num_labels, geoloc_features=num_geoloc_features
+        )
