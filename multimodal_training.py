@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from PIL import Image
+from PIL import Image, ImageFile
 from sklearn.metrics import classification_report
 from torch.optim import AdamW
 from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
@@ -16,6 +16,8 @@ from transformers import AutoTokenizer, get_scheduler
 
 from vl_model import create_model
 from ast import literal_eval
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class VLDataset(Dataset):
