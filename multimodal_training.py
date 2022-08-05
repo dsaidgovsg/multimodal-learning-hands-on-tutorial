@@ -444,7 +444,9 @@ def main():
     )
     args = parser.parse_args()
 
-    yaml_config = yaml.parse(args.config)
+    yaml_config_path = yaml.parse(args.config)
+    with open(yaml_config_path, "r") as f:
+        yaml_config = yaml.safe_load(f)
 
     results_folder = yaml_config.get("output_folder")
     os.makedirs(results_folder, exist_ok=True)
@@ -475,13 +477,16 @@ def main():
     }
 
     set_seed(seed_val)
-    classifier_train_test(
-        df_train,
-        df_test,
-        classifier_type="bert",
-        output_folder=results_folder,
-        args=args,
-    )
+
+    if args.get("image_path_field") is None:
+        classifier_train_test(
+            df_train,
+            df_test,
+            classifier_type="bert",
+            output_folder=results_folder,
+            args=args,
+        )
+
     # set_seed(seed_val)
     # classifier_train_test(
     #     df_train,
@@ -491,13 +496,16 @@ def main():
     #     args=args,
     # )
     # set_seed(seed_val)
-    # classifier_train_test(
-    #     df_train,
-    #     df_test,
-    #     classifier_type="albef",
-    #     output_folder=results_folder,
-    #     args=args,
-    # )
+
+    else:
+
+        classifier_train_test(
+            df_train,
+            df_test,
+            classifier_type="albef",
+            output_folder=results_folder,
+            args=args,
+        )
 
 
 if __name__ == "__main__":
