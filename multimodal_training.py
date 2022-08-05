@@ -444,7 +444,7 @@ def main():
     )
     args = parser.parse_args()
 
-    yaml_config_path = yaml.parse(args.config)
+    yaml_config_path = args.config
     with open(yaml_config_path, "r") as f:
         yaml_config = yaml.safe_load(f)
 
