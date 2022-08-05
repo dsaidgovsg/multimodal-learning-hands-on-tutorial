@@ -9,9 +9,9 @@ learning_rate: 2.0e-5
 weight_decay: 0
 warmup_steps: 0
 max_seq_length: 210
-text_field: cat_description
-label_field: agency
-image_path_field: images_path
+text_field: "cat_description"
+label_field: "agency"
+image_path_field: "image_paths"
 geoloc_start_index: 1
 geoloc_end_index: 15
 lr_scheduler: "cosine"
