@@ -23,11 +23,16 @@ class VLBertModel(nn.Module):
             self.text_encoder.config.hidden_size + self.geoloc_features, num_labels
         )
 
-    def forward(self, text):
-        output = self.text_encoder(
+    def forward(self, text, geoloc=None):
+        bert_output = self.text_encoder(
             text.input_ids, attention_mask=text.attention_mask, return_dict=True
         )
-        logits = self.classifier(output.last_hidden_state[:, 0, :])
+        bert_features = bert_output.last_hidden_state[:, 0, :]
+        if geoloc is None:
+            features = bert_features
+        else:
+            features = torch.cat((bert_features, geoloc), 1)
+        logits = self.classifier(features)
         return logits
 
 
@@ -78,7 +83,10 @@ class BertResNetModel(nn.Module):
         text_output = self.text_encoder(**text)
         text_feature = text_output.last_hidden_state[:, 0, :]
         img_feature = self.visual_encoder(image)
-        features = torch.cat((text_feature, img_feature), 1)
+        if geoloc is None:
+            features = torch.cat((text_feature, img_feature), 1)
+        else:
+            features = torch.cat((text_feature, img_feature, geoloc), 1)
 
         logits = self.classifier(features)
 
