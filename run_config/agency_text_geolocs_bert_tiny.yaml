@@ -8,8 +8,8 @@ num_train_epochs: 9
 learning_rate: 0.0008930676276027413
 weight_decay: 0
 warmup_steps: 0
-max_seq_length: 200
-text_field: processed_description
+max_seq_length: 210
+text_field: cat_description
 label_field: agency
 # image_path_field: first_image_path
 geoloc_start_index: 1
