@@ -1,4 +1,3 @@
-
 pretrained : "google/bert_uncased_L-2_H-128_A-2"
 train_path: "/home/watsonchua/work/MSO_shared/image_train_test/full_dataset_chatbot/agency/with_object_detection_features/train.csv"
 test_path: "/home/watsonchua/work/MSO_shared/image_train_test/full_dataset_chatbot/agency/with_object_detection_features/test.csv"
