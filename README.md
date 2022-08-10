@@ -62,7 +62,6 @@ A dual encoder which comprises a separate text encoder (BERT) and an image encod
 
 ### ALBEF
 A joint text-image encoder which aligns the BERT text encoder's embeddings with the image encoder's (Vision Transformers).
-
 ![](https://drive.google.com/uc?export=view&id=1zcBBx08_7ujlH2RS2WZrmTZ--Icsk4NN)
 
 
