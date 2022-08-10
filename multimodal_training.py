@@ -469,9 +469,9 @@ def main():
     parser.add_argument(
         "-c", "--config", type=str, required=True, help="path to yaml config"
     )
-    args = parser.parse_args()
+    parsed_args = parser.parse_args()
 
-    yaml_config_path = args.config
+    yaml_config_path = parsed_args.config
     with open(yaml_config_path, "r") as f:
         yaml_config = yaml.safe_load(f)
 
@@ -486,7 +486,7 @@ def main():
 
     seed_val = 0
 
-    args = {
+    training_args = {
         "pretrained": yaml_config.get("pretrained"),
         "batch_size": yaml_config.get("batch_size"),
         "num_train_epochs": yaml_config.get("num_train_epochs"),
@@ -505,13 +505,13 @@ def main():
 
     set_seed(seed_val)
 
-    if args.get("image_path_field") is None:
+    if training_args.get("image_path_field") is None:
         classifier_train_test(
             df_train,
             df_test,
             classifier_type="bert",
             output_folder=results_folder,
-            args=args,
+            args=parsed_args,
         )
 
     # set_seed(seed_val)
@@ -531,7 +531,7 @@ def main():
             df_test,
             classifier_type="albef",
             output_folder=results_folder,
-            args=args,
+            args=parsed_args,
         )
 
 
