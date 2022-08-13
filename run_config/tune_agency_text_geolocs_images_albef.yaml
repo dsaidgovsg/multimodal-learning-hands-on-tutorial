@@ -1,7 +1,7 @@
 
 pretrained : "bert-base-uncased"
-train_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/validate_train_with_images.csv"
-validation_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/validate_eval_with_images.csv"
+train_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/validate_train_with_images_sampled_large.csv"
+validation_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/validate_eval_with_images_sampled_large.csv"
 output_folder: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/results_with_geolocs/tune_text_geolocs_images_albef/"
 weight_decay: 0
 warmup_steps: 0
