@@ -65,5 +65,6 @@ A joint text-image encoder which aligns the BERT text encoder's embeddings with 
 ![](https://drive.google.com/uc?export=view&id=1zcBBx08_7ujlH2RS2WZrmTZ--Icsk4NN)
 
 
-Presentation slides for the KDD'22 Hands-On tutorial session are here[kdd_2022_multimodal_learning_slides.pdf].
+## Presentation Slides 
+The slides for the KDD'22 hands-on tutorial session are [here](kdd_2022_multimodal_learning_slides.pdf).
 
