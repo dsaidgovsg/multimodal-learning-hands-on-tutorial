@@ -4,3 +4,4 @@ torchvision
 sklearn
 timm
 pre-commit
+optuna
