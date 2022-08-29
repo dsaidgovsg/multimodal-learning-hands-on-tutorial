@@ -24,8 +24,21 @@ def main():
     albef_class_report = classification_report(
         df_test[albef_args.get("label_field")], albef_predictions, output_dict=True
     )
-    print(albef_class_report)
+    # print(albef_class_report)
     print("ALBEF Accuracy:", albef_class_report["accuracy"])
+
+    with open(
+        "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/results/text_geolocs_images_albef/albef/albef_class_report.json",
+        "w",
+    ) as f:
+        json.dump(albef_class_report, f)
+
+    df_out = df_test.copy()
+    df_out["prediction"] = albef_predictions
+    df_out.to_csv(
+        "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/results/text_geolocs_images_albef/albef/albef_predictions.csv",
+        index=False,
+    )
 
 
 if __name__ == "__main__":
