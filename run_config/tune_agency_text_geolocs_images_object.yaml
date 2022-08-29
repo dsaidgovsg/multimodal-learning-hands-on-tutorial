@@ -8,7 +8,7 @@ warmup_steps: 0
 max_seq_length: 210
 text_field: "cat_description"
 label_field: "agency"
-image_path_field: None
+# image_path_field: None
 geoloc_start_index: 1
 geoloc_end_index: 73
 n_trials: 50
