@@ -20,9 +20,7 @@ def main():
         albef_args = json.load(f)
 
     albef_classifier = from_pretrained(albef_folder)
-    albef_predictions = albef_classifier.predict(
-        df_test, {**albef_args, "image_model_type": "albef"}
-    )
+    albef_predictions = albef_classifier.predict(df_test, albef_args)
     albef_class_report = classification_report(
         df_test[albef_args.get("label_field")], albef_predictions, output_dict=True
     )

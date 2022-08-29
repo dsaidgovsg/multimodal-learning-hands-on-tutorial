@@ -394,6 +394,7 @@ def from_pretrained(load_directory):
 
     image_model_type = parameters["image_model_type"]
     num_labels = parameters["num_labels"]
+    pretrained = parameters["pretrained"]
 
     geoloc_start_index = parameters.get("geoloc_start_index")
     geoloc_end_index = parameters.get("geoloc_end_index")
@@ -411,6 +412,7 @@ def from_pretrained(load_directory):
     model = create_model(
         image_model_type=image_model_type,
         num_labels=num_labels,
+        text_pretrained=pretrained,
         num_geoloc_features=num_geoloc_features,
     )
     model.to("cpu")  # load all models in cpu first
