@@ -1,0 +1,14 @@
+
+pretrained : "google/bert_uncased_L-2_H-128_A-2"
+train_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/with_object_detection_features/validate_train_sampled_large.csv"
+validation_path: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/with_object_detection_features/validate_eval_sampled_large.csv"
+output_folder: "/home/shared/MSO/image_train_test/full_dataset_chatbot/agency/results_with_geolocs/tune_text_geolocs_images_object/"
+weight_decay: 0
+warmup_steps: 0
+max_seq_length: 210
+text_field: "cat_description"
+label_field: "agency"
+image_path_field: "image_paths"
+geoloc_start_index: 1
+geoloc_end_index: 73
+n_trials: 50
