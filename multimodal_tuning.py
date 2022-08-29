@@ -17,7 +17,7 @@ class Tuner:
 
     def objective(self, trial):
         epochs = trial.suggest_int("epochs", 0, 20)
-        learning_rate = trial.suggest_loguniform("learning_rate", 2.0e-7, 2.0e-3)
+        learning_rate = trial.suggest_float("learning_rate", 2.0e-7, 2.0e-3)
         batch_size = trial.suggest_categorical("batch_size", [4, 8, 16])
         lr_scheduler = trial.suggest_categorical("lr_scheduler", ["linear", "cosine"])
 
