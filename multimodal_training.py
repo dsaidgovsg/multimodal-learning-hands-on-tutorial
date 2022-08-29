@@ -441,6 +441,11 @@ def classifier_train_test(df_train, df_test, classifier_type, output_folder, arg
     image_model_type = classifier_to_image_model_map[classifier_type]
     classifier = VLClassifier(image_model_type=image_model_type)
     classifier.train(df_train, args)
+
+    model_save_dir = os.path.join(output_folder, classifier_type)
+    os.makedirs(model_save_dir)
+    classifier.save(model_save_dir)
+
     predictions = classifier.predict(df_test, args)
     class_report = classification_report(
         df_test[args.get("label_field")], predictions, output_dict=True
@@ -454,10 +459,6 @@ def classifier_train_test(df_train, df_test, classifier_type, output_folder, arg
     df_out = df_test.copy()
     df_out["prediction"] = predictions
     df_out.to_csv(output_folder + classifier_type + "_predictions.csv", index=False)
-
-    model_save_dir = os.path.join(output_folder, classifier_type)
-    os.makedirs(model_save_dir)
-    classifier.save(model_save_dir)
 
 
 def set_seed(seed_val):
