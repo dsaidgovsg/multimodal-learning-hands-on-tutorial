@@ -511,7 +511,7 @@ def main():
             df_test,
             classifier_type="bert",
             output_folder=results_folder,
-            args=parsed_args,
+            args=training_args,
         )
 
     # set_seed(seed_val)
@@ -531,7 +531,7 @@ def main():
             df_test,
             classifier_type="albef",
             output_folder=results_folder,
-            args=parsed_args,
+            args=training_args,
         )
 
 

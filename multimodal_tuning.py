@@ -70,7 +70,7 @@ class Tuner:
         classifier = VLClassifier(image_model_type=image_model_type)
         classifier.train(df_train, training_args)
         predictions = classifier.predict(df_validation, training_args)
-        validation_labels = df_validation[label_field], predictions
+        validation_labels = df_validation[label_field]
 
         # return best accuracy
         return accuracy_score(validation_labels, predictions)
