@@ -98,11 +98,11 @@ class VLDataset(Dataset):
         if self.image_model_type is not None:
             img_path = literal_eval(self.df.at[index, self.image_path_field])[0]
 
-            image = Image.open(img_path)
-            if self.train:
-                img = self.train_transform_func(image)
-            else:
-                img = self.eval_transform_func(image)
+            with Image.open(img_path) as image:
+                if self.train:
+                    img = self.train_transform_func(image)
+                else:
+                    img = self.eval_transform_func(image)
 
             if geolocs is not None:
                 return text, label, img, geolocs
