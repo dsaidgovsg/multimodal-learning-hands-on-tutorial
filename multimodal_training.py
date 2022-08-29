@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from PIL import Image, ImageFile
+from PIL import Image, ImageFile, UnidentifiedImageError
 from sklearn.metrics import classification_report
 from torch.optim import AdamW
 from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
@@ -98,11 +98,16 @@ class VLDataset(Dataset):
         if self.image_model_type is not None:
             img_path = literal_eval(self.df.at[index, self.image_path_field])[0]
 
-            with Image.open(img_path) as image:
+            try:
+                image = Image.open(img_path)
                 if self.train:
                     img = self.train_transform_func(image)
                 else:
                     img = self.eval_transform_func(image)
+
+            except UnidentifiedImageError as uie:
+                print(uie)
+                img = torch.zeros([3, self.img_size, self.img_size])
 
             if geolocs is not None:
                 return text, label, img, geolocs
